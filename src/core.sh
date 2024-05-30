@@ -65,7 +65,7 @@ info_list=(
     "指纹 (Fingerprint)"
     "公钥 (Public key)"
     "用户名 (Username)"
-    "跳过证书验证 (allowlnsecure)"
+    "跳过证书验证 (allowInsecure)"
     "拥塞控制算法 (congestion_control)"
 )
 change_list=(
@@ -1297,7 +1297,7 @@ info() {
                 is_insecure=1
                 is_info_show+=(8 9 20)
                 is_info_str+=(tls h3 true)
-                is_quic_add=",tls:\"tls\",alpn:\"h3\"" # cant add allowlnsecure
+                is_quic_add=",tls:\"tls\",alpn:\"h3\"" # cant add allowInsecure
             }
             is_vmess_url=$(jq -c "{v:2,ps:\"233boy-${net}-$is_addr\",add:\"$is_addr\",port:\"$port\",id:\"$uuid\",aid:\"0\",net:\"$net\",type:\"$is_type\"$is_quic_add}" <<<{})
             is_url=vmess://$(echo -n $is_vmess_url | base64 -w 0)
@@ -1313,7 +1313,7 @@ info() {
         is_insecure=1
         is_can_change=(0 1 4)
         is_info_show=(0 1 2 10 4 8 20)
-        is_url="$is_protocol://$password@$is_addr:$port?type=tcp&security=tls&allowlnsecure=1#233boy-$net-$is_addr"
+        is_url="$is_protocol://$password@$is_addr:$port?type=tcp&security=tls&allowInsecure=1#233boy-$net-$is_addr"
         is_info_str=($is_protocol $is_addr $port $password tcp tls true)
         ;;
     hy*)
@@ -1370,7 +1370,7 @@ info() {
         msg "------------- ${info_list[12]} -------------"
         msg "\e[4;${is_color}m${is_url}\e[0m"
         [[ $is_insecure ]] && {
-            warn "某些客户端如(V2rayN 等)导入URL需手动将: 跳过证书验证(allowlnsecure) 设置为 true, 或打开: 允许不安全的连接"
+            warn "某些客户端如(V2rayN 等)导入URL需手动将: 跳过证书验证(allowInsecure) 设置为 true, 或打开: 允许不安全的连接"
         }
     fi
     if [[ $is_no_auto_tls ]]; then
@@ -1516,7 +1516,7 @@ is_main_menu() {
         show_help
         ;;
     9)
-        ask list is_do_other "启用BBR 查看日志 查看错误日志 测试运行 重装脚本 设置DNS"
+        ask list is_do_other "启用BBR 查看日志 测试运行 重装脚本 设置DNS"
         case $REPLY in
         1)
             load bbr.sh
@@ -1526,15 +1526,12 @@ is_main_menu() {
             get log
             ;;
         3)
-            get logerr
-            ;;
-        4)
             get test-run
             ;;
-        5)
+        4)
             get reinstall
             ;;
-        6)
+        5)
             load dns.sh
             dns_set
             ;;
