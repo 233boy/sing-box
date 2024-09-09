@@ -443,6 +443,7 @@ change() {
         [[ $is_auto_get_config ]] && msg "\n自动选择: $is_config_file"
     }
     is_old_net=$net
+    [[ $is_tcp_http ]] && net=http
     [[ $host ]] && net=$is_protocol-$net-tls
     [[ $is_reality && $net_type =~ 'http' ]] && net=rh2
 
@@ -1290,6 +1291,7 @@ info() {
             [[ $net == "http" ]] && {
                 net=tcp
                 is_type=http
+                is_tcp_http=1
                 is_info_show+=(5)
                 is_info_str=(${is_info_str[@]/http/tcp http})
             }
