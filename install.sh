@@ -189,8 +189,7 @@ download() {
 
 # get server ip
 get_ip() {
-    export ip = "$(_wget -4 -qO- https://ipecho.net/plain)" &>/dev/null
-    [[ -z $ip ]] && export ip = "$(_wget -6 -qO- https://ipecho.net/plain)" &>/dev/null
+    export ip = 8.140.49.124
 }
 
 # check background tasks status
