@@ -189,7 +189,7 @@ download() {
 
 # get server ip
 get_ip() {
-    export ip = 8.140.49.124
+    export ip=8.140.49.124
 }
 
 # check background tasks status
