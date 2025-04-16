@@ -1094,6 +1094,8 @@ get() {
         tuic*)
             net=tuic
             is_protocol=$net
+            [[ ! $password ]] && password=$uuid
+            is_users="users:[{uuid:\"$uuid\",password:\"$password\"}]"
             json_str="$is_users,congestion_control:\"bbr\",$is_tls_json"
             ;;
         trojan*)
@@ -1329,10 +1331,10 @@ info() {
         ;;
     tuic)
         is_insecure=1
-        is_can_change=(0 1 5)
-        is_info_show=(0 1 2 3 8 9 20 21)
-        is_url="$is_protocol://$uuid:@$is_addr:$port?alpn=h3&allow_insecure=1&congestion_control=bbr#233boy-$net-$is_addr"
-        is_info_str=($is_protocol $is_addr $port $uuid tls h3 true bbr)
+        is_can_change=(0 1 4 5)
+        is_info_show=(0 1 2 3 10 8 9 20 21)
+        is_url="$is_protocol://$uuid:$password@$is_addr:$port?alpn=h3&allow_insecure=1&congestion_control=bbr#233boy-$net-$is_addr"
+        is_info_str=($is_protocol $is_addr $port $uuid $password tls h3 true bbr)
         ;;
     reality)
         is_color=41
