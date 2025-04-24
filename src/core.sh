@@ -369,7 +369,7 @@ create() {
         else
             [[ ! $is_ntp_on ]] && is_ntp=
         fi
-        is_outbounds='outbounds:[{tag:"direct",type:"direct"},{tag:"block",type:"block"}]'
+        is_outbounds='outbounds:[{tag:"direct",type:"direct"}]'
         is_server_config_json=$(jq "{$is_log,$is_dns,$is_ntp$is_outbounds}" <<<{})
         cat <<<$is_server_config_json >$is_config_json
         manage restart &
