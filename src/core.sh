@@ -1022,6 +1022,7 @@ get() {
         [[ ! $is_addr ]] && {
             get_ip
             is_addr=$ip
+            [[ $(grep ":" <<<$ip) ]] && is_addr="[$ip]"
         }
         ;;
     new)
@@ -1348,7 +1349,7 @@ info() {
             is_info_show=(${is_info_show[@]/15/})
         }
         is_info_str=($is_protocol $is_addr $port $uuid $is_flow $is_net_type reality $is_servername chrome $is_public_key)
-        is_url="$is_protocol://$uuid@$ip:$port?encryption=none&security=reality&flow=$is_flow&type=$is_net_type&sni=$is_servername&pbk=$is_public_key&fp=chrome#233boy-$net-$is_addr"
+        is_url="$is_protocol://$uuid@$is_addr:$port?encryption=none&security=reality&flow=$is_flow&type=$is_net_type&sni=$is_servername&pbk=$is_public_key&fp=chrome#233boy-$net-$is_addr"
         ;;
     direct)
         is_can_change=(0 1 7 8)
