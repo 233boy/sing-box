@@ -19,7 +19,7 @@ in_conf() {
     [[ ! $uuid ]] && uuid=$trojan_password
     if [[ $host ]]; then
         if [[ $is_caddy && -f $is_caddy_conf/$host.conf ]]; then
-            tmp_tlsport=$(egrep -o "$host:[1-9][0-9]?+" $is_caddy_conf/$host.conf | sed s/.*://)
+            tmp_tlsport=$(grep -E -o "$host:[1-9][0-9]?+" $is_caddy_conf/$host.conf | sed s/.*://)
         fi
         [[ $tmp_tlsport ]] && https_port=$tmp_tlsport
         add $is_protocol-$net-tls
@@ -53,10 +53,10 @@ is_change=1
 is_dont_auto_exit=1
 is_dont_test_host=1
 if [[ -f $is_xray_sh && -d $is_xray_conf ]]; then
-    is_list=($(ls $is_xray_conf | grep .json | egrep -iv 'kcp|grpc|dynamic|quic' | sed "s#^#$is_xray_conf/#"))
+    is_list=($(ls $is_xray_conf | grep .json | grep -E -iv 'kcp|grpc|dynamic|quic' | sed "s#^#$is_xray_conf/#"))
 fi
 if [[ -f $is_v2ray_sh && -d $is_v2ray_conf ]]; then
-    is_list+=($(ls $is_v2ray_conf | grep .json | egrep -iv 'kcp|grpc|dynamic|quic' | sed "s#^#$is_v2ray_conf/#"))
+    is_list+=($(ls $is_v2ray_conf | grep .json | grep -E -iv 'kcp|grpc|dynamic|quic' | sed "s#^#$is_v2ray_conf/#"))
 fi
 [[ ${is_list[@]} =~ "xray" ]] && is_xray_in=1
 [[ ${is_list[@]} =~ "v2ray" ]] && is_v2ray_in=1

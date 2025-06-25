@@ -159,7 +159,7 @@ show_list() {
 is_test() {
     case $1 in
     number)
-        echo $2 | egrep '^[1-9][0-9]?+$'
+        echo $2 | grep -E '^[1-9][0-9]?+$'
         ;;
     port)
         if [[ $(is_test number $2) ]]; then
@@ -170,13 +170,13 @@ is_test() {
         [[ $(is_port_used $2) && ! $is_cant_test_port ]] && echo ok
         ;;
     domain)
-        echo $2 | egrep -i '^\w(\w|\-|\.)?+\.\w+$'
+        echo $2 | grep -E -i '^\w(\w|\-|\.)?+\.\w+$'
         ;;
     path)
-        echo $2 | egrep -i '^\/\w(\w|\-|\/)?+\w$'
+        echo $2 | grep -E -i '^\/\w(\w|\-|\/)?+\w$'
         ;;
     uuid)
-        echo $2 | egrep -i '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+        echo $2 | grep -E -i '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
         ;;
     esac
 
@@ -781,7 +781,7 @@ add() {
             ;;
         *)
             for v in ${protocol_list[@]}; do
-                [[ $(egrep -i "^$is_lower$" <<<$v) ]] && is_new_protocol=$v && break
+                [[ $(grep -E -i "^$is_lower$" <<<$v) ]] && is_new_protocol=$v && break
             done
 
             [[ ! $is_new_protocol ]] && err "无法识别 ($1), 请使用: $is_core add [protocol] [args... | auto]"
@@ -905,7 +905,7 @@ add() {
             is_tmp_use_name=加密方式
             is_tmp_list=${ss_method_list[@]}
             for v in ${is_tmp_list[@]}; do
-                [[ $(egrep -i "^${is_use_method}$" <<<$v) ]] && is_tmp_use_type=$v && break
+                [[ $(grep -E -i "^${is_use_method}$" <<<$v) ]] && is_tmp_use_type=$v && break
             done
             [[ ! ${is_tmp_use_type} ]] && {
                 warn "(${is_use_method}) 不是一个可用的${is_tmp_use_name}."
@@ -1033,8 +1033,8 @@ get() {
     file)
         is_file_str=$2
         [[ ! $is_file_str ]] && is_file_str='.json$'
-        # is_all_json=("$(ls $is_conf_dir | egrep $is_file_str)")
-        readarray -t is_all_json <<<"$(ls $is_conf_dir | egrep -i "$is_file_str" | sed '/dynamic-port-.*-link/d' | head -233)" # limit max 233 lines for show.
+        # is_all_json=("$(ls $is_conf_dir | grep -E $is_file_str)")
+        readarray -t is_all_json <<<"$(ls $is_conf_dir | grep -E -i "$is_file_str" | sed '/dynamic-port-.*-link/d' | head -233)" # limit max 233 lines for show.
         [[ ! $is_all_json ]] && err "无法找到相关的配置文件: $2"
         [[ ${#is_all_json[@]} -eq 1 ]] && is_config_file=$is_all_json && is_auto_get_config=1
         [[ ! $is_config_file ]] && {
@@ -1071,7 +1071,7 @@ get() {
             is_config_name=$is_config_file
 
             if [[ $is_caddy && $host && -f $is_caddy_conf/$host.conf ]]; then
-                is_tmp_https_port=$(egrep -o "$host:[1-9][0-9]?+" $is_caddy_conf/$host.conf | sed s/.*://)
+                is_tmp_https_port=$(grep -E -o "$host:[1-9][0-9]?+" $is_caddy_conf/$host.conf | sed s/.*://)
             fi
             [[ $is_tmp_https_port ]] && is_https_port=$is_tmp_https_port
             [[ $is_client && $host ]] && port=$is_https_port
@@ -1205,11 +1205,6 @@ get() {
         is_dns_type="a"
         [[ $(grep ":" <<<$ip) ]] && is_dns_type="aaaa"
         is_host_dns=$(_wget -qO- --header="accept: application/dns-json" "https://one.one.one.one/dns-query?name=$host&type=$is_dns_type")
-        ;;
-    log | logerr)
-        msg "\n 提醒: 按 $(_green Ctrl + C) 退出\n"
-        [[ $1 == 'log' ]] && tail -f $is_log_dir/access.log
-        [[ $1 == 'logerr' ]] && tail -f $is_log_dir/error.log
         ;;
     install-caddy)
         _green "\n安装 Caddy 实现自动配置 TLS.\n"
@@ -1652,7 +1647,8 @@ main() {
         load import.sh
         ;;
     log)
-        get $@
+        load log.sh
+        log_set $2
         ;;
     url | qr)
         url_qr $@
