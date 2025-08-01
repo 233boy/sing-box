@@ -467,7 +467,7 @@ change() {
     1)
         # new port
         is_new_port=$3
-        [[ $host && ! $is_caddy ||  $is_no_auto_tls ]] && err "($is_config_file) 不支持更改端口, 因为没啥意义."
+        [[ $host && ! $is_caddy || $is_no_auto_tls ]] && err "($is_config_file) 不支持更改端口, 因为没啥意义."
         if [[ $is_new_port && ! $is_auto ]]; then
             [[ ! $(is_test port $is_new_port) ]] && err "请输入正确的端口, 可选(1-65535)"
             [[ $is_new_port != 443 && $(is_test port_used $is_new_port) ]] && err "无法使用 ($is_new_port) 端口"
@@ -655,7 +655,7 @@ del() {
                 [[ ! $old_host ]] && return # no host exist or not set new host;
                 is_del_host=$old_host
             }
-            [[ $is_del_host && $host != $old_host && ! $is_no_auto_tls ]] && {
+            [[ $is_del_host && $host != $old_host && -f $is_caddy_conf/$is_del_host.conf ]] && {
                 rm -rf $is_caddy_conf/$is_del_host.conf $is_caddy_conf/$is_del_host.conf.add
                 [[ ! $is_new_json ]] && manage restart caddy &
             }
@@ -1199,7 +1199,11 @@ get() {
         fi
         ;;
     ssss | ss2022)
-        $is_core_bin generate rand 32 --base64
+        if [[ $(grep 128 <<<$ss_method) ]]; then
+            $is_core_bin generate rand 16 --base64
+        else
+            $is_core_bin generate rand 32 --base64
+        fi
         ;;
     ping)
         # is_ip_type="-4"
