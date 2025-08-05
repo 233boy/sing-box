@@ -8,6 +8,9 @@ is_dns_list=(
     none
 )
 dns_set() {
+    if [[ $(echo -e "1.11.99\n$is_core_ver" | sort -V | head -n1) == '1.11.99' ]]; then
+        is_dns_new=1
+    fi
     if [[ $1 ]]; then
         case ${1,,} in
         11 | 1111)
@@ -46,11 +49,34 @@ dns_set() {
             ask string is_dns_use "请输入 DNS: "
         fi
     fi
+    is_dns_use_bak=$is_dns_use
     if [[ $is_dns_use == "none" ]]; then
         cat <<<$(jq '.dns={}' $is_config_json) >$is_config_json
     else
-        cat <<<$(jq '.dns.servers=[{address:"'$is_dns_use'",address_resolver:"local"},{tag:"local",address:"local"}]' $is_config_json) >$is_config_json
+        if [[ $is_dns_new ]]; then
+            dns_set_server $is_dns_use
+            cat <<<$(jq '.dns.servers=[{type:"'$is_dns_type'",server:"'$is_dns_use'",domain_resolver:"local"},{tag:"local",type:"local"}]' $is_config_json) >$is_config_json
+        else
+            cat <<<$(jq '.dns.servers=[{address:"'$is_dns_use'",address_resolver:"local"},{tag:"local",address:"local"}]' $is_config_json) >$is_config_json
+        fi
     fi
     manage restart &
-    msg "\n已更新 DNS 为: $(_green $is_dns_use)\n"
+    msg "\n已更新 DNS 为: $(_green $is_dns_use_bak)\n"
+}
+dns_set_server() {
+    if [[ $(grep '://' <<<$1) ]]; then
+        is_tmp_dns_set=($(awk -F '://|/' '{print $1, $2}' <<<${1,,}))
+        case ${is_tmp_dns_set[0]} in
+        tcp | udp | tls | https | quic | h3)
+            is_dns_use=${is_tmp_dns_set[1]}
+            is_dns_type=${is_tmp_dns_set[0]}
+            ;;
+        *)
+            err "无法识别 DNS 类型!"
+            ;;
+        esac
+    else
+        is_dns_use=$1
+        is_dns_type=udp
+    fi
 }
