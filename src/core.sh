@@ -1536,7 +1536,8 @@ is_main_menu() {
             _try_enable_bbr
             ;;
         2)
-            get log
+            load log.sh
+            log_set
             ;;
         3)
             get test-run
