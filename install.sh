@@ -34,9 +34,9 @@ warn() {
 # root
 [[ $EUID != 0 ]] && err "当前非 ${yellow}ROOT用户.${none}"
 
-# yum or apt-get, ubuntu/debian/centos
-cmd=$(type -P apt-get || type -P yum)
-[[ ! $cmd ]] && err "此脚本仅支持 ${yellow}(Ubuntu or Debian or CentOS)${none}."
+# apt-get, yum or zypper, ubuntu/debian/centos/suse
+cmd=$(type -P apt-get || type -P yum || type -P zypper)
+[[ ! $cmd ]] && err "此脚本仅支持 ${yellow}(Ubuntu or Debian or CentOS or SUSE)${none}."
 
 # systemd
 [[ ! $(type -P systemctl) ]] && {
@@ -144,7 +144,11 @@ install_pkg() {
         $cmd install -y $pkg &>/dev/null
         if [[ $? != 0 ]]; then
             [[ $cmd =~ yum ]] && yum install epel-release -y &>/dev/null
-            $cmd update -y &>/dev/null
+            if [[ $cmd =~ zypper ]]; then
+                $cmd --non-interactive refresh &>/dev/null
+            else
+                $cmd update -y &>/dev/null
+            fi
             $cmd install -y $pkg &>/dev/null
             [[ $? == 0 ]] && >$is_pkg_ok
         else

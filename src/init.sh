@@ -58,8 +58,8 @@ _wget() {
     wget --no-check-certificate "$@"
 }
 
-# yum or apt-get
-cmd=$(type -P apt-get || type -P yum)
+# apt-get, yum or zypper
+cmd=$(type -P apt-get || type -P yum || type -P zypper)
 
 # x64
 case $(arch) in
