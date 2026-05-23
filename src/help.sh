@@ -32,7 +32,7 @@ show_help() {
             "   port [name] [port | auto]                       更改端口"
             "   path [name] [path | auto]                       更改路径"
             "   passwd [name] [password | auto]                 更改密码"
-            "   key [name] [Private key | atuo] [Public key]    更改密钥"
+            "   key [name] [Private key | auto] [Public key]    更改密钥"
             # "   type [name] [type | auto]                       更改伪装类型"
             "   method [name] [method | auto]                   更改加密方式"
             "   sni [name] [ ip | domain]                       更改 serverName"
