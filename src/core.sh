@@ -1156,6 +1156,16 @@ get() {
         is_lower=${2,,}
         net=
         is_users="users:[{uuid:\"$uuid\"}]"
+        # tmp tls key
+        is_tls_cer=$is_core_dir/bin/tls.cer
+        is_tls_key=$is_core_dir/bin/tls.key
+        [[ ! -f $is_tls_cer || ! -f $is_tls_key ]] && {
+            is_tls_tmp=${is_tls_key/key/tmp}
+            $is_core_bin generate tls-keypair tls -m 456 >$is_tls_tmp
+            awk '/BEGIN PRIVATE KEY/,/END PRIVATE KEY/' $is_tls_tmp >$is_tls_key
+            awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/' $is_tls_tmp >$is_tls_cer
+            rm $is_tls_tmp
+        }
         is_tls_json='tls:{enabled:true,alpn:["h3"],key_path:"'$is_tls_key'",certificate_path:"'$is_tls_cer'"}'
         case $is_lower in
         vmess*)

@@ -104,17 +104,6 @@ is_https_port=443
 # core ver
 is_core_ver=$($is_core_bin version | head -n1 | cut -d " " -f3)
 
-# tmp tls key
-is_tls_cer=$is_core_dir/bin/tls.cer
-is_tls_key=$is_core_dir/bin/tls.key
-[[ ! -f $is_tls_cer || ! -f $is_tls_key ]] && {
-    is_tls_tmp=${is_tls_key/key/tmp}
-    $is_core_bin generate tls-keypair tls -m 456 >$is_tls_tmp
-    awk '/BEGIN PRIVATE KEY/,/END PRIVATE KEY/' $is_tls_tmp >$is_tls_key
-    awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/' $is_tls_tmp >$is_tls_cer
-    rm $is_tls_tmp
-}
-
 if [[ $(pgrep -f $is_core_bin) ]]; then
     is_core_status=$(_green running)
 else
