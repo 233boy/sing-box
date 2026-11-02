@@ -449,8 +449,8 @@ main() {
     mkdir -p $is_conf_dir
 
     load core.sh
-    # create a reality config
-    add reality
+    # create a config
+    add hy2
     # wait for background tasks (e.g., OpenRC service start)
     wait
     # remove tmp dir and exit.
