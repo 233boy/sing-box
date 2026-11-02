@@ -198,10 +198,104 @@ download() {
     }
 }
 
+is_public_ip() {
+    local family=$1
+    local addr=${2,,}
+    local IFS
+    local parts
+    [[ ! $addr ]] && return 1
+    case $family in
+    4)
+        IFS=.
+        parts=($addr)
+        [[ ${#parts[@]} -eq 4 ]] || return 1
+        for v in "${parts[@]}"; do
+            [[ $v =~ ^[0-9]+$ && $v -le 255 ]] || return 1
+        done
+        case $addr in
+        0.* | 10.* | 127.* | 169.254.* | 192.0.0.* | 192.0.2.* | 192.168.* | 198.18.* | 198.19.* | 198.51.100.* | 203.0.113.* | 224.* | 240.* | 255.*)
+            return 1
+            ;;
+        100.6[4-9].* | 100.[7-9][0-9].* | 100.1[0-1][0-9].* | 100.12[0-7].*)
+            return 1
+            ;;
+        172.1[6-9].* | 172.2[0-9].* | 172.3[0-1].*)
+            return 1
+            ;;
+        esac
+        return 0
+        ;;
+    6)
+        [[ $addr =~ ^([0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}$ ]] || return 1
+        case $addr in
+        :: | ::1 | fe8* | fe9* | fea* | feb* | fc* | fd* | 2001:db8* | ff*)
+            return 1
+            ;;
+        esac
+        return 0
+        ;;
+    esac
+    return 1
+}
+
+get_ip_from_text() {
+    local family=$1
+    if [[ $family == 4 ]]; then
+        grep -E -o '([0-9]{1,3}\.){3}[0-9]{1,3}' <<<"$2" | head -n1
+    else
+        grep -E -i -o '([0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}' <<<"$2" | head -n1
+    fi
+}
+
+get_ip_by_url() {
+    local family=$1
+    local url=$2
+    local body found
+    body=$(_wget -"$family" -qO- -T 3 -t 1 "$url" 2>/dev/null)
+    [[ ! $body ]] && return 1
+    found=$(get_ip_from_text "$family" "$body")
+    is_public_ip "$family" "$found" || return 1
+    ip=$found
+    export ip
+}
+
+ask_public_ip() {
+    local input
+    [[ -t 0 ]] || err "自动获取服务器 IP 失败, 且当前无法交互输入. 请在可交互终端中重试."
+    warn "自动获取服务器 IP 失败, 请手动输入公网 IP."
+    while :; do
+        echo -ne "请输入公网 IP:"
+        read -r input
+        input=${input//[[:space:]]/}
+        is_public_ip 4 "$input" || is_public_ip 6 "$input" || {
+            msg err "请输入正确的公网 IP."
+            continue
+        }
+        ip=$input
+        export ip
+        return
+    done
+}
+
 # get server ip
 get_ip() {
-    export "$(_wget -4 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
-    [[ -z $ip ]] && export "$(_wget -6 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
+    local ip_urls=(
+        https://one.one.one.one/cdn-cgi/trace
+        https://4.ipw.cn
+        https://6.ipw.cn
+        https://api64.ipify.org
+        https://icanhazip.com
+        https://ifconfig.me/ip
+        https://ifconfig.co/ip
+        https://ipinfo.io/ip
+    )
+    for url in "${ip_urls[@]}"; do
+        get_ip_by_url 4 "$url" && return
+    done
+    for url in "${ip_urls[@]}"; do
+        get_ip_by_url 6 "$url" && return
+    done
+    ask_public_ip
 }
 
 # check background tasks status
